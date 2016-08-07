@@ -6,6 +6,8 @@ ruby '2.3.1'
 
 gem 'nokogiri'
 gem 'rest-client'
+gem 'vcr'
+gem 'webmock'
 
 group :development do
   gem 'rubocop'
