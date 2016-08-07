@@ -10,3 +10,22 @@ def get_movie_list
 
  json.flatten.uniq
 end
+
+def get_runtime_for_movie(movie_id)
+  doc = Nokogiri::HTML RestClient.get "https://mubi.com/films/#{id}"
+
+  doc.css('.film-show__film-meta').text.strip.to_i
+end
+
+def calculate_total_runtime
+  movie_list = get_movie_list
+
+  runtimes = movie_list.each_with_index.map do |movie, i|
+    puts i + 1
+    get_runtime_for_movie movie['film_id']
+  end
+
+  require 'pry'; binding.pry
+end
+
+calculate_total_runtime
