@@ -11,8 +11,10 @@ end
 def get_movie_list
   VCR.use_cassette('mubi_list_films') do
     json = (1..21).to_a.map do |page|
-     puts page
-     JSON.parse RestClient.get 'https://mubi.com/services/api/lists/108835/list_films', params: { page: page }
+      response = RestClient.get 'https://mubi.com/services/api/lists/108835/list_films',
+                                params: { page: page }
+
+      JSON.parse response
     end
 
     json.flatten.uniq
