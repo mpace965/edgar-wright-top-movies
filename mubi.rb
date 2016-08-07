@@ -24,4 +24,13 @@ def calculate_total_runtime
     puts i + 1
     get_runtime_for_movie movie['film_id']
   end
+
+  puts format_runtime runtimes.reduce(0, :+)
+end
+
+def format_runtime(minutes)
+  seconds = minutes * 60
+  days = Time.at(seconds).utc.strftime('%j').to_i
+
+  Time.at(seconds).utc.strftime("#{days} days, %H hours, and %M minutes.")
 end
