@@ -33,10 +33,9 @@ class Mubi
       json = (1..pages).map do |page|
         progressbar.increment
 
-        JSON.parse RestClient.get(
+        JSON.parse RestClient.get \
           'https://mubi.com/services/api/lists/108835/list_films',
           params: { page: page }
-        )
       end
 
       progressbar.finish
