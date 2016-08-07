@@ -60,6 +60,7 @@ DEPENDENCIES
   pry
   rest-client
   rubocop
+  ruby-progressbar
   vcr
   webmock
 

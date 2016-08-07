@@ -1,6 +1,7 @@
 require 'json'
 require 'nokogiri'
 require 'rest-client'
+require 'ruby-progressbar'
 require 'vcr'
 
 require './movie_page_scraper.rb'
@@ -19,11 +20,18 @@ class Mubi
 
   # Attribute methods
 
+  # rubocop:disable MethodLength
   def movie_list_json
     @movie_list_json ||= VCR.use_cassette 'mubi_list_films' do
       # Each page has 48 movies, ceiling of 1000 / 48 is 21.
-      json = (1..21).map do |page|
-        puts page
+      pages = 21
+
+      progressbar = ProgressBar.create \
+        title: 'Fetching Movie List ',
+        total: pages
+
+      json = (1..pages).map do |page|
+        progressbar.increment
 
         JSON.parse RestClient.get(
           'https://mubi.com/services/api/lists/108835/list_films',
@@ -31,17 +39,24 @@ class Mubi
         )
       end
 
+      progressbar.finish
+
       # There shouldn't be any duplicates, but just in case
       json.flatten.uniq
     end
   end
 
   # Constructs a Movie object for each one in Edgar's top 1000
-  # rubocop:disable AbcSize, MethodLength
+  # rubocop:disable AbcSize
   def movie_list
     @movie_list ||= VCR.use_cassette 'mubi_list_film_pages' do
-      movie_list_json.each_with_index.map do |m, i|
-        puts i + 1
+      progressbar = ProgressBar.create \
+        title: 'Scraping Movie Pages',
+        total: movie_list_json.length
+
+      movie_list = movie_list_json.each.map do |m|
+        progressbar.increment
+
         s = MoviePageScraper.new m['film_id']
 
         Movie.new \
@@ -55,6 +70,10 @@ class Mubi
           synopsis: s.synopsis,
           rating: s.rating
       end
+
+      progressbar.finish
+
+      movie_list
     end
   end
 
