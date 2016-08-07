@@ -5,7 +5,7 @@ class Movie
                 :directors,
                 :release_country,
                 :release_year,
-                :genre,
+                :genres,
                 :runtime,
                 :synopsis,
                 :rating
@@ -16,7 +16,7 @@ class Movie
     @directors = params[:directors]
     @release_country = params[:release_country]
     @release_year = params[:release_year]
-    @genre = params[:genre]
+    @genres = params[:genres]
     @runtime = params[:runtime]
     @synopsis = params[:synopsis]
     @rating = params[:rating]
