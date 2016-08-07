@@ -12,6 +12,8 @@ class Mubi
   def initialize
     movie_list_json
     movie_list
+
+    generate_histogram_methods
   end
 
   def formatted_runtime
@@ -83,5 +85,47 @@ class Mubi
   # In minutes
   def total_runtime
     @total_runtime ||= movie_list.map(&:runtime).reduce(0, :+)
+  end
+
+  private
+
+  # Make methods for making histograms of the appropriate attributes
+  def generate_histogram_methods
+    hist_attributes = %w(
+      directors
+      release_year
+      release_country
+      genres
+      runtime
+      rating
+    )
+
+    hist_attributes.each do |a|
+      method_name = "#{unpluralize a}_histogram"
+      iv_name = "@#{method_name}"
+
+      define_singleton_method method_name do
+        instance_variable_set iv_name, memoize(iv_name, a)
+      end
+    end
+  end
+
+  # Avoids recalculation if the instance variable is already defined
+  def memoize(iv_name, a)
+    if instance_variable_defined? iv_name
+      instance_variable_get iv_name
+    else
+      hist = Hash.new 0
+      # Array of attributes corresponding to the method name
+      array = movie_list.map { |m| m.send a }
+
+      array.flatten.each { |e| hist[e] += 1 }
+      Hash[hist.sort_by { |_, v| v }.reverse]
+    end
+  end
+
+  def unpluralize(word)
+    return word.chop if word.end_with? 's'
+    word
   end
 end
