@@ -9,19 +9,15 @@ require './vcr_config'
 
 # Calculates statistics on Edgar Wright's 1000 favorite movies on mubi.com
 class Mubi
-  def calculate_total_runtime
-    runtimes = movie_list.map { |m| runtime_for_movie m['film_id'] }
-
-    puts format_runtime runtimes.reduce(0, :+)
-  end
-
-  def format_runtime(minutes)
-    seconds = minutes * 60
+  def formatted_runtime
+    seconds = total_runtime * 60
     # Extract days of the year to strip 0 padding
     days = Time.at(seconds).utc.strftime('%j').to_i
 
     Time.at(seconds).utc.strftime("#{days} days, %H hours, and %M minutes.")
   end
+
+  # Attribute methods
 
   def movie_list_json
     @movie_list_json ||= VCR.use_cassette 'mubi_list_films' do
@@ -40,6 +36,8 @@ class Mubi
     end
   end
 
+  # Constructs a Movie object for each one in Edgar's top 1000
+  # rubocop:disable AbcSize, MethodLength
   def movie_list
     @movie_list ||= VCR.use_cassette 'mubi_list_film_pages' do
       movie_list_json.each_with_index.map do |m, i|
@@ -58,5 +56,10 @@ class Mubi
           rating: s.rating
       end
     end
+  end
+
+  # In minutes
+  def total_runtime
+    @total_runtime ||= movie_list.map(&:runtime).reduce(0, :+)
   end
 end
