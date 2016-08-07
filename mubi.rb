@@ -1,8 +1,10 @@
-require 'rest-client'
-require 'nokogiri'
 require 'json'
+require 'nokogiri'
+require 'rest-client'
 require 'vcr'
 
+require './movie.rb'
+require './scraper.rb'
 require './vcr_config'
 
 # Calculates statistics on Edgar Wright's 1000 favorite movies on mubi.com
@@ -21,24 +23,26 @@ class Mubi
     Time.at(seconds).utc.strftime("#{days} days, %H hours, and %M minutes.")
   end
 
-  def runtime_for_movie(id)
-    doc = movie_page_list[id]
+  # Scrapes the film's mubi page for information not available from the JSON
+  def other_info_for_movie(id)
+    doc = Nokogiri::HTML RestClient.get "https://mubi.com/films/#{id}"
 
-    # The movie duration was not available via an API call like the movie list
-    # However, it is conveniently the only text of this node
-    doc.css('.film-show__film-meta').text.strip.to_i
+    {
+      release_country: doc.css('.film-show__country-year').text.strip.split.first.chop,
+      runtime: doc.css('.film-show__film-meta').text.strip.to_i
+    }
   end
 
-  def movie_list
-    @movie_list ||= VCR.use_cassette 'mubi_list_films' do
+  def movie_list_json
+    @movie_list_json ||= VCR.use_cassette 'mubi_list_films' do
       # Each page has 48 movies, ceiling of 1000 / 48 is 21.
       json = (1..21).map do |page|
         puts page
 
-        response = RestClient.get 'https://mubi.com/services/api/lists/108835/list_films',
-                                  params: { page: page }
-
-        JSON.parse response
+        JSON.parse RestClient.get(
+          'https://mubi.com/services/api/lists/108835/list_films',
+          params: { page: page }
+        )
       end
 
       # There shouldn't be any duplicates, but just in case
@@ -46,16 +50,23 @@ class Mubi
     end
   end
 
-  def movie_page_list
-    @movie_page_list ||= VCR.use_cassette 'mubi_list_film_pages' do
-      page_list_array = movie_list.each_with_index.map do |movie, i|
+  def movie_list
+    @movie_list ||= VCR.use_cassette 'mubi_list_film_pages' do
+      movie_list_json.each_with_index.map do |m, i|
         puts i + 1
-        response = RestClient.get "https://mubi.com/films/#{movie['film_id']}"
+        other_info = other_info_for_movie m['film_id']
 
-        [movie['film_id'], Nokogiri::HTML(response)]
+        movie = Movie.new \
+          id: m['film_id'],
+          title: m['film']['title'],
+          directors: m['film']['directors'],
+          release_year: m['film']['year']
+
+        movie
       end
-
-      Hash[page_list_array]
     end
   end
 end
+
+m = Mubi.new
+m.movie_list
