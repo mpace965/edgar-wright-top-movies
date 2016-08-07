@@ -12,7 +12,7 @@ def get_movie_list
 end
 
 def get_runtime_for_movie(movie_id)
-  doc = Nokogiri::HTML RestClient.get "https://mubi.com/films/#{id}"
+  doc = Nokogiri::HTML RestClient.get "https://mubi.com/films/#{movie_id}"
 
   doc.css('.film-show__film-meta').text.strip.to_i
 end
@@ -24,8 +24,4 @@ def calculate_total_runtime
     puts i + 1
     get_runtime_for_movie movie['film_id']
   end
-
-  require 'pry'; binding.pry
 end
-
-calculate_total_runtime
