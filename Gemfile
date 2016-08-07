@@ -4,9 +4,9 @@ source 'https://rubygems.org'
 
 ruby '2.3.1'
 
-gem 'rest-client'
 gem 'nokogiri'
 
 group :development do
   gem 'rubocop'
+  gem 'pry'
 end
