@@ -1,5 +1,4 @@
 require 'json'
-require 'nokogiri'
 require 'rest-client'
 require 'ruby-progressbar'
 require 'vcr'
