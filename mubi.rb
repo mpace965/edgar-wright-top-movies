@@ -9,6 +9,11 @@ require './vcr_config'
 
 # Calculates statistics on Edgar Wright's 1000 favorite movies on mubi.com
 class Mubi
+  def initialize
+    movie_list_json
+    movie_list
+  end
+
   def formatted_runtime
     seconds = total_runtime * 60
     # Extract days of the year to strip 0 padding
