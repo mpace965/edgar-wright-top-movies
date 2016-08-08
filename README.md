@@ -10,7 +10,7 @@ a bit more robust.
 
 Prior to installing, you should have Ruby 2.3.1 downloaded on your machine. If
 you do not, [rvm](https://rvm.io/) provides an easy way of doing so. Once you
-have Ruby 2.3.1 installed, just clone this repo and then running
+have Ruby 2.3.1 installed, just clone this repo and then run
 
 1. `gem install bundler`, if you haven't
 1. `bundle install`
