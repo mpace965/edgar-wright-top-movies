@@ -58,7 +58,7 @@ histograms are sorted from highest occurring key to lowest.
 - `Mubi#release_year_histogram`
 - `Mubi#runtime_histogram`
 - `Mubi#synopsis_word_histogram`
-  - Splits each synopsis into its individual word, and makes a histogram of all
+  - Splits each synopsis into its individual words, and makes a histogram of all
   of these words.
 
 
