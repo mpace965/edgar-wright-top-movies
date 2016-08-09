@@ -103,10 +103,10 @@ class Mubi
 
     hist_attributes.each do |a|
       method_name = "#{unpluralize a}_histogram"
-      iv_name = "@#{method_name}"
+      instance_variable_name = "@#{method_name}"
 
       define_singleton_method method_name do
-        memoized_result = memoize(iv_name) do
+        memoized_result = memoize(instance_variable_name) do
           hist = Hash.new 0
           # Array of attributes corresponding to the method name
           array = movie_list.map { |m| m.send a }
@@ -115,15 +115,15 @@ class Mubi
           Hash[hist.sort_by { |_, v| v }.reverse]
         end
 
-        instance_variable_set iv_name, memoized_result
+        instance_variable_set instance_variable_name, memoized_result
       end
     end
   end
 
   # Avoids recalculation if the instance variable is already defined
-  def memoize(iv_name)
-    if instance_variable_defined? iv_name
-      instance_variable_get iv_name
+  def memoize(instance_variable_name)
+    if instance_variable_defined? instance_variable_name
+      instance_variable_get instance_variable_name
     else
       yield
     end
