@@ -29,8 +29,8 @@ class Mubi
   # rubocop:disable MethodLength
   def movie_list_json
     @movie_list_json ||= VCR.use_cassette 'mubi_list_films' do
-      # Each page has 48 movies, ceiling of 1000 / 48 is 21.
-      pages = 21
+      # Each page has 48 movies, 1000 movies total
+      pages = (1000 / 48.0).ceil
 
       progressbar = ProgressBar.create \
         title: 'Fetching Movie List ',
