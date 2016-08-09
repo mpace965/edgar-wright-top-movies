@@ -106,22 +106,26 @@ class Mubi
       iv_name = "@#{method_name}"
 
       define_singleton_method method_name do
-        instance_variable_set iv_name, memoize(iv_name, a)
+        memoized_result = memoize(iv_name) do
+          hist = Hash.new 0
+          # Array of attributes corresponding to the method name
+          array = movie_list.map { |m| m.send a }
+
+          array.flatten.each { |e| hist[e] += 1 }
+          Hash[hist.sort_by { |_, v| v }.reverse]
+        end
+
+        instance_variable_set iv_name, memoized_result
       end
     end
   end
 
   # Avoids recalculation if the instance variable is already defined
-  def memoize(iv_name, a)
+  def memoize(iv_name)
     if instance_variable_defined? iv_name
       instance_variable_get iv_name
     else
-      hist = Hash.new 0
-      # Array of attributes corresponding to the method name
-      array = movie_list.map { |m| m.send a }
-
-      array.flatten.each { |e| hist[e] += 1 }
-      Hash[hist.sort_by { |_, v| v }.reverse]
+      yield
     end
   end
 
