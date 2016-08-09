@@ -17,7 +17,8 @@ have Ruby 2.3.1 installed, just clone this repo and then run
 
 ## Using
 
-The easiest way to interact with the data is to fire up an `irb` session:
+The easiest way to interact with the data is to fire up an `irb` session in the
+`src` directory:
 
 ```
 $ irb
