@@ -89,7 +89,7 @@ class Mubi
 
   private
 
-  # Make methods for making histograms of the appropriate attributes
+  # Make methods for making histograms of the appropriate Movie attributes
   def generate_histogram_methods
     hist_attributes = %w(
       directors
