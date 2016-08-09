@@ -21,4 +21,10 @@ class Movie
     @synopsis = params[:synopsis]
     @rating = params[:rating]
   end
+
+  def synopsis_words
+    @synopsis_words ||= @synopsis.scan(/[[:word:]]+’*[[:word:]]*/)
+                                 .flatten
+                                 .map(&:downcase)
+  end
 end

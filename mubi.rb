@@ -82,22 +82,6 @@ class Mubi
     end
   end
 
-  def synopsis_word_histogram
-    @synopsis_word_histogram ||= begin
-      hist = Hash.new 0
-
-      # /[[:word:]]+/ matches any unicode word, so the regex below matches any
-      # word with an apostrophe at the end, and potentially more text following
-      regex = /[[:word:]]+’*[[:word:]]*/
-      synopsis_words = movie_list.map { |m| m.synopsis.scan(regex) }
-                                 .flatten
-                                 .map(&:downcase)
-
-      synopsis_words.each { |word| hist[word] += 1 }
-      Hash[hist.sort_by { |_, v| v }.reverse]
-    end
-  end
-
   # In minutes
   def total_runtime
     @total_runtime ||= movie_list.map(&:runtime).reduce(0, :+)
@@ -113,6 +97,7 @@ class Mubi
       release_country
       genres
       runtime
+      synopsis_words
       rating
     )
 
