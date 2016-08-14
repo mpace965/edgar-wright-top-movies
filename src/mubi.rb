@@ -106,7 +106,7 @@ class Mubi
       instance_variable_name = "@#{method_name}"
 
       define_singleton_method method_name do
-        memoized_result = memoize(instance_variable_name) do
+        memoized_result = memoize instance_variable_name do
           hist = Hash.new 0
           # Array of attributes corresponding to the method name
           array = movie_list.map { |m| m.send a }
