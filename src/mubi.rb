@@ -144,7 +144,9 @@ class Mubi
         File.open data_dir.join(unpluralized_attribute), 'w' do |file|
           hist = send method_base
 
-          write_stat_line file, unpluralized_attribute, 'count'
+          file.write unpluralized_attribute
+          file.write ' count'
+          file.write "\n"
 
           hist.each_pair do |k, v|
             write_stat_line file, k, v
@@ -171,7 +173,7 @@ class Mubi
   end
 
   def write_stat_line(file, stat, value)
-    file.write stat
+    file.write "\"#{stat}\""
     file.write ' '
     file.write value
     file.write "\n"
