@@ -1,4 +1,5 @@
 require 'json'
+require 'pathname'
 require 'rest-client'
 require 'ruby-progressbar'
 require 'vcr'
@@ -8,12 +9,14 @@ require './movie.rb'
 require './vcr_config'
 
 # Calculates statistics on Edgar Wright's 1000 favorite movies on mubi.com
+# rubocop:disable ClassLength
 class Mubi
   def initialize
     movie_list_json
     movie_list
 
     generate_histogram_methods
+    generate_histogram_write_methods
   end
 
   def formatted_runtime
@@ -87,21 +90,29 @@ class Mubi
     @total_runtime ||= movie_list.map(&:runtime).reduce(0, :+)
   end
 
+  def write_all_histograms
+    HIST_ATTRIBUTES.each do |a|
+      send "#{unpluralize a}_histogram_write"
+    end
+
+    nil
+  end
+
   private
+
+  HIST_ATTRIBUTES = %w(
+    directors
+    release_year
+    release_country
+    genres
+    runtime
+    synopsis_words
+    rating
+  ).freeze
 
   # Make methods for making histograms of the appropriate Movie attributes
   def generate_histogram_methods
-    hist_attributes = %w(
-      directors
-      release_year
-      release_country
-      genres
-      runtime
-      synopsis_words
-      rating
-    )
-
-    hist_attributes.each do |a|
+    HIST_ATTRIBUTES.each do |a|
       method_name = "#{unpluralize a}_histogram"
       instance_variable_name = "@#{method_name}"
 
@@ -120,6 +131,31 @@ class Mubi
     end
   end
 
+  def generate_histogram_write_methods
+    project_root = Pathname.pwd.parent
+    data_dir = project_root.join('stats').join('data')
+    Dir.mkdir data_dir unless Dir.exist? data_dir
+
+    HIST_ATTRIBUTES.each do |a|
+      unpluralized_attribute = unpluralize a
+      method_base = "#{unpluralized_attribute}_histogram"
+
+      define_singleton_method "#{method_base}_write" do
+        File.open data_dir.join(unpluralized_attribute), 'w' do |file|
+          hist = send method_base
+
+          write_stat_line file, unpluralized_attribute, 'count'
+
+          hist.each_pair do |k, v|
+            write_stat_line file, k, v
+          end
+        end
+
+        nil
+      end
+    end
+  end
+
   # Avoids recalculation if the instance variable is already defined
   def memoize(instance_variable_name)
     if instance_variable_defined? instance_variable_name
@@ -132,5 +168,12 @@ class Mubi
   def unpluralize(word)
     return word.chop if word.end_with? 's'
     word
+  end
+
+  def write_stat_line(file, stat, value)
+    file.write stat
+    file.write ' '
+    file.write value
+    file.write "\n"
   end
 end
